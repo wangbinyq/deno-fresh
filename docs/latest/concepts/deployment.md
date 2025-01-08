@@ -36,7 +36,7 @@ caching **will** cause your project to not function correctly.
 Here is an example `Dockerfile` for a Fresh project:
 
 ```dockerfile Dockerfile
-FROM denoland/deno:1.35.0
+FROM denoland/deno:1.38.3
 
 ARG GIT_REVISION
 ENV DENO_DEPLOYMENT_ID=${GIT_REVISION}
@@ -68,6 +68,17 @@ documentation.
 
 - [Amazon Web Services][aws-container-registry]
 - [Google Cloud][gcp-container-registry]
+
+## Self Contained Executable
+
+With Deno 2.1, you can create a self-contained executable of your Fresh project
+that includes all assets and dependencies. This executable can run on any
+platform without requiring Deno to be installed.
+
+```sh Terminal
+$ deno build
+$ deno compile --include static --include _fresh --include deno.json -A main.ts
+```
 
 [aws-container-registry]: https://docs.aws.amazon.com/AmazonECS/latest/userguide/create-container-image.html#create-container-image-push-ecr
 [gcp-container-registry]: https://cloud.google.com/container-registry/docs/pushing-and-pulling

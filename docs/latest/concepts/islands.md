@@ -4,8 +4,9 @@ description: |
 ---
 
 Islands enable client side interactivity in Fresh. Islands are isolated Preact
-components that are rendered on the client. This is different from all other
-components in Fresh, as they are usually just rendered on the server.
+components that are rendered on the server and then hydrated on the client. This
+is different from all other components in Fresh, as they are usually rendered on
+the server only.
 
 Islands are defined by creating a file in the `islands/` folder in a Fresh
 project. The name of this file must be a PascalCase or kebab-case name of the
@@ -77,6 +78,34 @@ export default function Home() {
 }
 ```
 
+You can also create shared components in your `components/` directory, which can
+be used in both static content and interactive islands. When these components
+are used within islands, interactivity can be added, such as `onClick` handlers
+(using an `onClick` handler on a button outside of an island will not fire).
+
+```tsx islands/my-island.tsx
+import { useSignal } from "@preact/signals";
+import { ComponentChildren } from "preact";
+import Card from "../components/Card.tsx";
+import Button from "../components/Button.tsx";
+
+interface Props {
+  children: ComponentChildren;
+}
+
+export default function MyIsland({ children }: Props) {
+  const count = useSignal(0);
+
+  return (
+    <Card>
+      Counter is at {count}.{" "}
+      <Button onClick={() => (count.value += 1)}>+</Button>
+      {children}
+    </Card>
+  );
+}
+```
+
 ## Passing other props to islands
 
 Passing props to islands is supported, but only if the props are serializable.
@@ -133,14 +162,15 @@ function randomNumber() {
   return Math.floor(Math.random() * 100);
 }
 
-export default function MyIsland({ children, foo }: Props) {
+export default function OtherIsland({ children, foo }: Props) {
   const number = useSignal(randomNumber());
 
   return (
     <div>
       <p>String from props: {foo}</p>
       <p>
-        <button onClick={() => (number.value = randomNumber())}>Random</button>{" "}
+        <button onClick={() => (number.value = randomNumber())}>Random</button>
+        {" "}
         number is: {number}.
       </p>
     </div>
@@ -149,8 +179,8 @@ export default function MyIsland({ children, foo }: Props) {
 ```
 
 In essence, Fresh allows you to mix static and interactive parts in your app in
-a way that's most optimal for your use app. We'll keep sending only the
-JavaScript that is needed for the islands to the browser.
+a way that's most optimal for your app. We'll keep sending only the JavaScript
+that is needed for the islands to the browser.
 
 ```tsx route/index.tsx
 import MyIsland from "../islands/my-island.tsx";
@@ -165,5 +195,34 @@ export default function Home() {
       <p>Some more server rendered text</p>
     </div>
   );
+}
+```
+
+## Rendering islands on client only
+
+When using client-only APIs, like `EventSource` or `navigator.getUserMedia`,
+this component will not run on the server as it will produce an error like:
+
+```
+An error occurred during route handling or page rendering. ReferenceError: EventSource is not defined
+    at Object.MyIsland (file:///Users/someuser/fresh-project/islandsmy-island.tsx:6:18)
+    at m (https://esm.sh/v129/preact-render-to-string@6.2.0/X-ZS8q/denonext/preact-render-to-string.mjs:2:2602)
+    at m (https://esm.sh/v129/preact-render-to-string@6.2.0/X-ZS8q/denonext/preact-render-to-string.mjs:2:2113)
+    ....
+```
+
+Use the [`IS_BROWSER`](https://deno.land/x/fresh/runtime.ts?doc=&s=IS_BROWSER)
+flag as a guard to fix the issue:
+
+```tsx islands/my-island.tsx
+import { IS_BROWSER } from "$fresh/runtime.ts";
+
+export function MyIsland() {
+  // Return any prerenderable JSX here which makes sense for your island
+  if (!IS_BROWSER) return <div></div>;
+
+  // All the code which must run in the browser comes here!
+  // Like: EventSource, navigator.getUserMedia, etc.
+  return <div></div>;
 }
 ```
