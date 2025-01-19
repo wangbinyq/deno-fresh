@@ -30,7 +30,7 @@ export const handler: Handlers<Page> = {
     let rawMarkdown = "";
     if (ctx.params.slug === "remote") {
       const resp = await fetch(
-        `https://raw.githubusercontent.com/denoland/fresh/main/docs/latest/introduction/index.md`
+        `https://raw.githubusercontent.com/denoland/fresh/main/docs/latest/introduction/index.md`,
       );
       if (resp.status !== 200) {
         return ctx.render(undefined);
@@ -92,8 +92,8 @@ description: testFromText
 
 You'll also need to import the `Github Flavored Markdown` module:
 
-```json
-"$gfm": "https://deno.land/x/gfm@0.2.3/mod.ts",
+```bash
+deno add @deno/gfm
 ```
 
 Andy has a helpful [post](https://deno.com/blog/build-a-blog-with-fresh) on the

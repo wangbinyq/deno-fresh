@@ -1,7 +1,7 @@
 // Copyright 2022-2023 the Deno authors. All rights reserved. MIT license.
 
-import { IS_BROWSER } from "$fresh/runtime.ts";
-import { type VersionLink } from "../routes/docs/[...slug].tsx";
+import { IS_BROWSER } from "fresh/runtime";
+import type { VersionLink } from "../routes/docs/[...slug].tsx";
 
 export default function VersionSelect(
   { versions, selectedVersion }: {
@@ -14,7 +14,7 @@ export default function VersionSelect(
 
   return (
     <>
-      <div class="relative">
+      <div class="relative mr-4 sm:mr-0">
         <label htmlFor="version" class="sr-only">
           Version
         </label>
