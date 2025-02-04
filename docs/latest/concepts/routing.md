@@ -28,14 +28,15 @@ File names are mapped to route patterns as follows:
 Here is a table of file names, which route patterns they map to, and which paths
 they might match:
 
-| File name                 | Route pattern          | Matching paths             |
-| ------------------------- | ---------------------- | -------------------------- |
-| `index.ts`                | `/`                    | `/`                        |
-| `about.ts`                | `/about`               | `/about`                   |
-| `blog/index.ts`           | `/blog`                | `/blog`                    |
-| `blog/[slug].ts`          | `/blog/:slug`          | `/blog/foo`, `/blog/bar`   |
-| `blog/[slug]/comments.ts` | `/blog/:slug/comments` | `/blog/foo/comments`       |
-| `old/[...path].ts`        | `/old/:path*`          | `/old/foo`, `/old/bar/baz` |
+| File name                   | Route pattern          | Matching paths                          |
+| --------------------------- | ---------------------- | --------------------------------------- |
+| `index.ts`                  | `/`                    | `/`                                     |
+| `about.ts`                  | `/about`               | `/about`                                |
+| `blog/index.ts`             | `/blog`                | `/blog`                                 |
+| `blog/[slug].ts`            | `/blog/:slug`          | `/blog/foo`, `/blog/bar`                |
+| `blog/[slug]/comments.ts`   | `/blog/:slug/comments` | `/blog/foo/comments`                    |
+| `old/[...path].ts`          | `/old/:path*`          | `/old/foo`, `/old/bar/baz`              |
+| `docs/[[version]]/index.ts` | `/docs{/:version}?`    | `/docs`, `/docs/latest`, `/docs/canary` |
 
 Advanced use-cases can require that a more complex pattern be used for matching.
 A custom [URL pattern][urlpattern] can be specified in the route configuration.
@@ -80,9 +81,9 @@ can only have one `_layout` file.
 ```
 
 We can solve this problem with route groups. A route group is a folder which has
-a name that is wrapped in braces. For example `(pages)` would be considered a
-route and so would be `(marketing)`. This enables us to group related routes in
-a folder and use a different `_layout` file for each group.
+a name that is wrapped in parentheses. For example `(info)` would be considered
+a route group and so would `(marketing)`. This enables us to group related
+routes in a folder and use a different `_layout` file for each group.
 
 ```txt Project structure
 └── routes
@@ -96,8 +97,9 @@ a folder and use a different `_layout` file for each group.
         └── contact.tsx
 ```
 
-> ℹ️ Be careful about routes in different groups which match to the same URL.
-> Such scenarios will lead to ambiguity as to which route file should be picked.
+> [warn]: Be careful about routes in different groups which match to the same
+> URL. Such scenarios will lead to ambiguity as to which route file should be
+> picked.
 >
 > ```txt Project structure
 > └── routes
@@ -108,3 +110,41 @@ a folder and use a different `_layout` file for each group.
 > ```
 
 [urlpattern]: https://developer.mozilla.org/en-US/docs/Web/API/URL_Pattern_API
+
+## Co-location
+
+If you want to store components and islands closer to their routes, you may want
+to use co-location.
+
+When the name of a route group folder starts with an underscore, like
+`(_components)`, Fresh will ignore that folder and it’s effectively treated as
+private. This means you can use these private route folders to store components
+related to a particular route.
+
+Following the above example, say you have some components you only want to use
+in your marketing pages, you could create a route group folder `(_components)`
+to house these.
+
+The one special name is `(_islands)` which tells Fresh to treat all files in
+that folder as an island.
+
+```txt Project structure
+└── routes
+    ├── (marketing)
+    │   ├── _layout.tsx
+    │   ├── about.tsx
+    │   ├── career.tsx
+    │   ├── (_components)
+    │   │   └── newsletter-cta.tsx
+    │   └── (_islands)
+    │       └── interactive-stats.tsx # Fresh treats this as an island
+    └── shop
+        ├── (_components)
+        │   └── product-card.tsx
+        └── (_islands)
+            └── cart.tsx # Fresh treats this as an island
+```
+
+Combined together, this gives you the ability to organise your code on a feature
+basis and put all related components, islands or anything else into a shared
+folder.

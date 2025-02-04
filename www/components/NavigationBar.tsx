@@ -1,3 +1,4 @@
+import ThemeToggle from "../islands/ThemeToggle.tsx";
 import * as Icons from "./Icons.tsx";
 
 export default function NavigationBar(
@@ -13,27 +14,26 @@ export default function NavigationBar(
       href: "/showcase",
     },
     {
-      name: "Components",
-      href: "/components",
-    },
-    {
       name: "Blog",
       href: "https://deno.com/blog?tag=fresh",
     },
   ];
   const isHome = props.active == "/";
+  const isDocs = props.active == "/docs";
   return (
-    <nav class={"flex " + props.class ?? ""}>
-      <ul class="flex justify-center items-center gap-4 mx-4 my-6 flex-wrap">
+    <nav class={"flex " + (props.class ?? "")} f-client-nav={false}>
+      <ul class="flex items-center gap-x-2 sm:gap-4 mx-4 my-2 sm:my-6 flex-wrap lg:mx-8 2xl:mr-0">
         {items.map((item) => (
-          <li>
+          <li key={item.name}>
             <a
               href={item.href}
-              class={`p-2 ${
-                isHome ? "text-green-900" : "text-gray-600"
-              } hover:underline ${
-                props.active == item.href ? "font-bold" : ""
-              }`}
+              class={`p-1 sm:p-2 ${
+                isHome
+                  ? "text-green-900"
+                  : isDocs
+                  ? "text-foreground-secondary"
+                  : "text-gray-600"
+              } hover:underline aria-[current]:font-bold`}
             >
               {item.name}
             </a>
@@ -58,6 +58,11 @@ export default function NavigationBar(
             <Icons.Discord />
           </a>
         </li>
+        {isDocs && (
+          <li class="flex items-center">
+            <ThemeToggle />
+          </li>
+        )}
       </ul>
     </nav>
   );
